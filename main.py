@@ -5,6 +5,8 @@ import numpy as np
 import threading
 import time
 import pyrebase
+from picamera import PiCamera
+from picamera.array import PiRGBArray
 
 font = cv2.FONT_HERSHEY_SIMPLEX
 font_scale = 0.8
@@ -27,7 +29,18 @@ firebase = pyrebase.initialize_app(firebaseConfig)
 database = firebase.database()
 
 # Video feed
-cap = cv2.VideoCapture('carPark.mp4')
+#cap = cv2.VideoCapture('carPark.mp4')
+#cap = cv2.VideoCapture(0)
+
+# Create a PiCamera object
+camera = PiCamera()
+
+# Set camera parameters
+camera.resolution = (1920, 1080)  # Set desired resolution
+camera.framerate = 30  # Set desired framerate
+raw_capture = PiRGBArray(camera, size=camera.resolution)
+
+
 
 with open('CarParkPos', 'rb') as f:
     posList = pickle.load(f)
@@ -105,21 +118,25 @@ def checkParkingSpace(imgPro):
     # print("firebase updated\n")
     # # time.sleep(10)
 
-while True:
+with camera as cam:
+    cam.start_preview()
 
-    if cap.get(cv2.CAP_PROP_POS_FRAMES) == cap.get(cv2.CAP_PROP_FRAME_COUNT):
-        cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
-    success, img = cap.read()
-    imgGray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)#converts the frame to grayscale using cv2.cvtColor()
-    imgBlur = cv2.GaussianBlur(imgGray, (3, 3), 1)#to reduce noise and smooth the image
-    imgThreshold = cv2.adaptiveThreshold(imgBlur, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C,
-                                         cv2.THRESH_BINARY_INV, 25, 16)#it applies adaptive thresholding  to segment the image into foreground and background pixels
-    imgMedian = cv2.medianBlur(imgThreshold, 5)# further remove noise.
-    kernel = np.ones((3, 3), np.uint8)#
-    imgDilate = cv2.dilate(imgMedian, kernel, iterations=1)# fill in small gaps and connect nearby edges.
+    for frame in cam.capture_continuous(raw_capture, format="bgr", use_video_port=True):
+        img = frame.array
+        imgGray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+        imgBlur = cv2.GaussianBlur(imgGray, (3, 3), 1)
+        imgThreshold = cv2.adaptiveThreshold(imgBlur, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C,
+                                             cv2.THRESH_BINARY_INV, 25, 16)
+        imgMedian = cv2.medianBlur(imgThreshold, 5)
+        kernel = np.ones((3, 3), np.uint8)
+        imgDilate = cv2.dilate(imgMedian, kernel, iterations=1)
 
-    checkParkingSpace(imgDilate)
-    cv2.imshow("Image", img)
-    # cv2.imshow("ImageBlur", imgBlur)
-    # cv2.imshow("ImageThres", imgMedian)
-    cv2.waitKey(10)
+        checkParkingSpace(imgDilate)
+        cv2.imshow("Image", img)
+
+        raw_capture.truncate(0)
+        if cv2.waitKey(10) == 27:  # Press ESC to exit
+            break
+
+    cam.stop_preview()
+    cv2.destroyAllWindows()
