@@ -26,6 +26,13 @@ firebaseConfig = {
 }
 
 firebase = pyrebase.initialize_app(firebaseConfig)
+# Authenticate user
+auth = firebase.auth()
+email = "abualrobhussam1@gmail.com"
+password = "7iskodisco123"
+user = auth.sign_in_with_email_and_password(email, password)
+
+
 database = firebase.database()
 
 # Video feed
