@@ -71,7 +71,7 @@ def checkParkingSpace(imgPro):
         count = cv2.countNonZero(imgCrop)#counts the number of non-zero (white) pixels in the cropped image
 
         #less than 900 meaning it is empty spot
-        if count < 500:# Checks if the count of non-zero pixels is less than a certain threshold (900 in this case).
+        if count < 100:# Checks if the count of non-zero pixels is less than a certain threshold (900 in this case).
             color = (0, 255, 0)
             thickness = 5
             spaceCounter += 1
