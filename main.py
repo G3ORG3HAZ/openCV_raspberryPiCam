@@ -23,11 +23,21 @@ firebaseConfig = {
   "measurementId": "G-LT0J0WKTWT"
 }
 
+
+
 firebase = pyrebase.initialize_app(firebaseConfig)
+    # Authenticate user
+auth = firebase.auth()
+email = "abualrobhussam1@gmail.com"
+password = "7iskodisco123"
+user = auth.sign_in_with_email_and_password(email, password)
+
+
 database = firebase.database()
 
+
 # Video feed
-cap = cv2.VideoCapture('carPark.mp4')
+cap = cv2.VideoCapture('output8.h264')
 
 with open('CarParkPos', 'rb') as f:
     posList = pickle.load(f)
