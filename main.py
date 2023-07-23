@@ -38,7 +38,7 @@ database = firebase.database()
 collection = 'Adab'
 
 # Video feed
-cap = cv2.VideoCapture('output8-cut.mp4')
+cap = cv2.VideoCapture('output3.h264')
 
 with open('CarParkPos', 'rb') as f:
     posList = pickle.load(f)
@@ -64,7 +64,6 @@ for index, spot in enumerate(posList):
 
 #width, height = 90, 120
 def update_firebase():
-    #time.sleep(10)
     while True:
         for index, spot in enumerate(boolean_list):
             database.child(collection).child(index).update({"state":boolean_list[index]["state"]})
@@ -134,11 +133,19 @@ while True:
     checkParkingSpace(imgDilate)
 
     cv2.imshow("Image", img)
-    cv2.imshow("ImageGray", imgGray)
-    cv2.imshow("ImageBlur", imgBlur)
-    cv2.imshow("ImageThreshold", imgThreshold)
-    cv2.imshow("ImageMedian", imgMedian)
-    cv2.imshow("ImageDilate", imgDilate)
+    # cv2.imshow("ImageGray", imgGray)
+    # cv2.imshow("ImageBlur", imgBlur)
+    # cv2.imshow("ImageThreshold", imgThreshold)
+    
+
+    # cv2.imshow("ImageMedian", imgMedian)
+    
+    #imgMedian_resized = cv2.resize(imgMedian, (1920, 1080))
+    #cv2.imshow("Resized ImageMedian", imgMedian_resized)
+    
+    
+    
+    # cv2.imshow("ImageDilate", imgDilate)
 
 
     # cv2.imshow("ImageBlur", imgBlur)
